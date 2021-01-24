@@ -1,0 +1,115 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="redis-search" type="RediSearchType"/>
+    <xs:complexType name="stopsWordsType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="word" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="idType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="type" use="required">
+                    <xs:simpleType xml:base="xs:string">
+                        <xs:restriction>
+                            <xs:enumeration value="getter" />
+                            <xs:enumeration value="property" />
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="abstractFieldType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute type="xs:boolean" name="noindex" use="optional"/>
+                <xs:attribute type="xs:string" name="property" use="optional"/>
+                <xs:attribute type="xs:string" name="getter" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="textFieldType">
+        <xs:simpleContent>
+            <xs:extension base="abstractFieldType">
+                <xs:attribute type="xs:string" name="nostem" use="optional"/>
+                <xs:attribute type="xs:float" name="weight" use="optional"/>
+                <xs:attribute type="xs:string" name="phonetic" use="optional"/>
+                <xs:attribute type="xs:boolean" name="sortable" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="numericFieldType">
+        <xs:simpleContent>
+            <xs:extension base="abstractFieldType">
+                <xs:attribute type="xs:boolean" name="sortable" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="tagFieldType">
+        <xs:simpleContent>
+            <xs:extension base="abstractFieldType">
+                <xs:attribute type="xs:string" name="separator" use="optional" />
+                <xs:attribute type="xs:boolean" name="sortable" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="geoFieldType">
+        <xs:simpleContent>
+            <xs:extension base="abstractFieldType"/>
+        </xs:simpleContent>
+    </xs:complexType>
+    <xs:complexType name="fieldsType">
+        <xs:sequence>
+            <xs:element type="textFieldType" name="text-field" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="numericFieldType" name="numeric-field" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="tagFieldType" name="tag-field" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="geoFieldType" name="geo-field" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="suggestionType">
+        <xs:attribute type="xs:string" name="name" use="required"/>
+        <xs:attribute type="xs:float" name="score" use="optional"/>
+        <xs:attribute name="type" use="optional">
+            <xs:simpleType xml:base="xs:string">
+                <xs:restriction>
+                    <xs:enumeration value="word" />
+                    <xs:enumeration value="full" />
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute type="xs:string" name="payload" use="optional"/>
+        <xs:attribute type="xs:string" name="group" use="optional"/>
+        <xs:attribute type="xs:boolean" name="increment" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="suggestionsType">
+        <xs:sequence>
+            <xs:element type="suggestionType" name="property" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="suggestionType" name="getter" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="classType">
+        <xs:sequence>
+            <xs:element type="stopsWordsType" name="stops-words" maxOccurs="1" minOccurs="0">
+                <xs:unique name="UniqueStopWord">
+                    <xs:selector xpath="*"/>
+                    <xs:field xpath="."/>
+                </xs:unique>
+            </xs:element>
+            <xs:element type="fieldsType" name="fields" maxOccurs="1" minOccurs="0">
+                <xs:unique name="UniqueFieldName">
+                    <xs:selector xpath="*"/>
+                    <xs:field xpath="."/>
+                </xs:unique>
+            </xs:element>
+            <xs:element type="suggestionsType" name="suggestions" maxOccurs="1" minOccurs="0"/>
+            <xs:element type="idType" name="id" maxOccurs="1" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name" use="required"/>
+        <xs:attribute type="xs:string" name="indexname" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="RediSearchType">
+        <xs:sequence>
+            <xs:element type="classType" name="class" maxOccurs="unbounded" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

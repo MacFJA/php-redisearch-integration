@@ -1,0 +1,19 @@
+[
+  {
+    "class": "MacFJA\\RediSearch\\Integration\\tests\\fixtures\\json\\Person",
+    "index": "person",
+    "stop-words": ["the", "redis"],
+    "id": { "name": "getId", "type": "getter" },
+    "fields": {
+      "firstname": {"property": "firstname","type": "text", "phonetic": "fr", "sortable":  true},
+      "age": {"type": "numeric"},
+      "skill": {"getter":"getSkills","type": "tag", "separator": "|", "sortable":  false, "noindex": false},
+      "address": {"getter":"getCoordinate","type": "geo"}
+    },
+    "suggestions": [
+      { "property": "firstname", "type": "word", "payload": "type:firstname", "score": 0.5, "group": "nameSuggestion" },
+      { "getter": "getLastname", "type": "full", "group": "nameSuggestion"},
+      { "getter": "getCity", "type": "full"}
+    ]
+  }
+]

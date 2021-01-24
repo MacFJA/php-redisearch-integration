@@ -1,0 +1,156 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RediSearch JSON Mapping",
+  "type": "array",
+  "default": [],
+  "$defs": {
+    "id": {
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "pattern": "(property|getter)" }
+      },
+      "additionalProperties": false
+    },
+    "fields": {
+      "textField": {
+        "required": [ "type" ],
+        "properties": {
+          "type": { "type": "string", "pattern": "text" },
+          "nostem": { "type": "boolean", "default": false },
+          "weight": { "type": "number" },
+          "phonetic": { "type": "string" },
+          "property": { "type": "string" },
+          "getter": { "type": "string" },
+          "sortable": { "type": "boolean", "default": false },
+          "noindex": { "type": "boolean", "default": false }
+        },
+        "additionalProperties": false
+      },
+      "numericField": {
+        "required": [ "type" ],
+        "properties": {
+          "type": { "type": "string", "pattern": "numeric" },
+          "property": { "type": "string" },
+          "getter": { "type": "string" },
+          "sortable": { "type": "boolean", "default": false },
+          "noindex": { "type": "boolean", "default": false }
+        },
+        "additionalProperties": false
+      },
+      "tagField": {
+        "required": [ "type" ],
+        "properties": {
+          "type": { "type": "string", "pattern": "tag" },
+          "separator": { "type": "string", "maxLength": 1, "minLength": 1 },
+          "property": { "type": "string" },
+          "getter": { "type": "string" },
+          "sortable": { "type": "boolean", "default": false },
+          "noindex": { "type": "boolean", "default": false }
+        },
+        "additionalProperties": false
+      },
+      "geoField": {
+        "required": [ "type" ],
+        "properties": {
+          "type": { "type": "string", "pattern": "geo" },
+          "property": { "type": "string" },
+          "getter": { "type": "string" },
+          "noindex": { "type": "boolean", "default": false }
+        },
+        "additionalProperties": false
+      }
+    },
+    "suggestions": {
+      "propertySuggestion": {
+        "required": ["property"],
+        "properties": {
+          "property": { "type": "string" },
+          "type": { "type": "string", "pattern": "(word|full)" },
+          "payload": { "type": "string" },
+          "score": { "type": "number" },
+          "group": { "type": "string" },
+          "increment": { "type": "boolean", "default": false }
+        },
+        "additionalProperties": false
+      },
+      "getterSuggestion": {
+        "required": ["getter"],
+        "properties": {
+          "getter": { "type": "string" },
+          "type": { "type": "string", "pattern": "(word|full)" },
+          "payload": { "type": "string" },
+          "score": { "type": "number" },
+          "group": { "type": "string" },
+          "increment": { "type": "boolean", "default": false }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "items": {
+    "$id": "#root/items",
+    "title": "Items",
+    "type": "object",
+    "required": [
+      "class",
+      "fields"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "class": {
+        "$id": "#root/items/class",
+        "title": "Class",
+        "type": "string",
+        "default": "",
+        "pattern": "^.*$"
+      },
+      "index": {
+        "$id": "#root/items/index",
+        "title": "Index",
+        "type": "string",
+        "default": "",
+        "pattern": "^.*$"
+      },
+      "stop-words": {
+        "$id": "#root/items/stop-words",
+        "title": "Stop-words",
+        "type": "array",
+        "default": [],
+        "items": {
+          "$id": "#root/items/stop-words/items",
+          "title": "Items",
+          "type": "string",
+          "default": "",
+          "pattern": "^.*$"
+        }
+      },
+      "fields": {
+        "$id": "#root/items/fields",
+        "title": "Fields",
+        "type": "object",
+        "additionalProperties": {
+          "anyOf": [
+            { "$ref": "#/$defs/fields/textField" },
+            { "$ref": "#/$defs/fields/numericField" },
+            { "$ref": "#/$defs/fields/tagField" },
+            { "$ref": "#/$defs/fields/geoField" }
+          ]
+        },
+        "minProperties": 1
+      },
+      "suggestions": {
+        "$id": "#root/items/suggestions",
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {"$ref" :"#/$defs/suggestions/propertySuggestion"},
+            {"$ref": "#/$defs/suggestions/getterSuggestion"}
+          ],
+          "minItems": 1
+        }
+      }
+    }
+  }
+}
