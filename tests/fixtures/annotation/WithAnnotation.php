@@ -30,7 +30,7 @@ use MacFJA\RediSearch\Integration\Annotation\TagField;
 use MacFJA\RediSearch\Integration\Annotation\TextField;
 
 /**
- * @Index(name="tests_annotation")
+ * @Index(name="tests_annotation", prefix="document-")
  */
 class WithAnnotation
 {

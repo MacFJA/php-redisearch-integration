@@ -235,25 +235,27 @@ The **After** allow you to do more action with results.
 
 ### The `Before` group
 
-_In **bold** paramaters that can be changed._
+_In **bold** parameters that can be changed._
 
 Event name | `ObjectManager` method | Available parameters
 --- | --- | ---
 `AddingDocumentToSearchEvent` | `addObjectInSearch` and `addObject` | **`data`**, **`documentId`**, `instance` _(r/o)_ 
 `AddingSuggestionEvent` | `addObjectInSuggestion` and `addObject` | **`group`**, **`suggestion`**, **`score`**, **`increment`**, **`payload`**, `instance` _(r/o)_ 
 `CreatingIndexEvent` | `createIndex` | **`builder`**, `classname` _(r/o)_ 
+`GettingFacetsEvent` | `getFacets` | `classname` _(r/o)_, **`query`**, **`fields`** 
 `GettingSuggestionsEvent` | `getSuggestions` | `classname` _(r/o)_, **`prefix`**, **`fuzzy`**, **`withScores`**, **`withPayloads`**, **`max`**, **`inGroup`** 
 `RemovingDocumentEvent` | `removeObjectFromSearch` | `instance` _(r/o)_, **`documentId`** 
 
 ### The `After` group
 
-_In **bold** paramaters that can be changed._
+_In **bold** parameters that can be changed._
 
 Event name | `ObjectManager` method | Available parameters
 --- | --- | ---
 `AddingDocumentToSearchEvent` | `addObjectInSearch` and `addObject` |  `data` _(r/o)_, `documentId` _(r/o)_, `instance` _(r/o)_
 `AddingSuggestionEvent` | `addObjectInSuggestion` and `addObject` | `group` _(r/o)_, `suggestion` _(r/o)_, `score` _(r/o)_, `increment` _(r/o)_, `payload` _(r/o)_, `instance` _(r/o)_
 `CreatingIndexEvent` | `createIndex` | `succeed` _(r/o)_, `classname` _(r/o)_
+`GettingFacetsEvent` | `getFacets` | `classname` _(r/o)_, `query` _(r/o)_, `fields` _(r/o)_, **`facets`**
 `GettingSearchBuilderEvent` | `getSearchBuilder` | **`searchBuilder`**, `classname` _(r/o)_ 
 `GettingSuggestionsEvent` | `getSuggestions` | `classname` _(r/o)_, `prefix` _(r/o)_, `fuzzy` _(r/o)_, `withScores` _(r/o)_, `withPayloads` _(r/o)_, `max` _(r/o)_, `inGroup` _(r/o)_, **`suggestions`** 
 `RemovingDocumentEvent` | `removeObjectFromSearch` | `instance` _(r/o)_, `documentId` _(r/o)_, `succeed` _(r/o)_

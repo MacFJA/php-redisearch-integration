@@ -75,6 +75,21 @@ abstract class TemplateAnnotationMapper implements MappedClass
         return self::getClass();
     }
 
+    public static function getRSIndexDocumentPrefix(): ?string
+    {
+        $reflectionClass = new ReflectionClass(self::getClass());
+        $reader = new AnnotationReader();
+        $indexName = $reader->getClassAnnotation(
+            $reflectionClass,
+            Index::class
+        );
+        if ($indexName instanceof Index) {
+            return $indexName->getPrefix();
+        }
+
+        return null;
+    }
+
     public function getRSDataArray($instance): array
     {
         $classname = self::getClass();

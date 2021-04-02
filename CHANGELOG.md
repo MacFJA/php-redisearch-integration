@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Facets
+- Document prefix in mappings (JSON/XML/Annotation/Attribute)
+
 ## [1.0.0]
 
 First version

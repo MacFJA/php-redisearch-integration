@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <redis-search xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://github.com/MacFJA/php-redisearch-integration/blob/main/src/Xml/schema.xsd">
-    <class name="MacFJA\RediSearch\Integration\tests\fixtures\xml\Person" indexname="person">
+    <class name="MacFJA\RediSearch\Integration\tests\fixtures\xml\Person" indexname="person" documentprefix="document-id-">
         <id type="property">id</id>
         <stops-words>
             <word>the</word>

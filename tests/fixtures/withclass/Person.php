@@ -66,11 +66,16 @@ class Person implements MappedClass
 
     public function getRSDocumentId($instance): ?string
     {
-        return 'document_'.$this->id;
+        return self::getRSIndexDocumentPrefix().$this->id;
     }
 
     public static function getRSSuggestionGroups(): array
     {
         return ['name'];
+    }
+
+    public static function getRSIndexDocumentPrefix(): ?string
+    {
+        return 'document_';
     }
 }

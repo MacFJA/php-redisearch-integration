@@ -66,6 +66,13 @@ abstract class TemplateJsonMapper implements MappedClass
         return $data['index'] ?? $data['class'];
     }
 
+    public static function getRSIndexDocumentPrefix(): ?string
+    {
+        $data = self::getJsonData();
+
+        return $data['document-prefix'] ?? null;
+    }
+
     public function getRSDataArray($instance): array
     {
         $data = self::getJsonData();

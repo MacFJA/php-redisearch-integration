@@ -113,6 +113,13 @@
         "default": "",
         "pattern": "^.*$"
       },
+      "document-prefix": {
+        "$id": "#root/items/document-prefix",
+        "title": "Index Document Prefix",
+        "type": "string",
+        "default": "",
+        "pattern": "^.*$"
+      },
       "stop-words": {
         "$id": "#root/items/stop-words",
         "title": "Stop-words",

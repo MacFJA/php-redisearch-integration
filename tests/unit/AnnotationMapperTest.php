@@ -64,6 +64,7 @@ class AnnotationMapperTest extends TestCase
         self::assertSame($provider->getStaticMappedClass(WithAnnotation::class), get_class($mapped));
 
         self::assertSame('tests_annotation', $mapped::getRSIndexName());
+        self::assertSame('document-', $mapped::getRSIndexDocumentPrefix());
         self::assertCount(5, $mapped::getRSFieldsDefinition());
         self::assertEquals([
             new Builder\TextField('firstname', false, null, 'fr'),

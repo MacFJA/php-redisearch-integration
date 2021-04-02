@@ -32,6 +32,8 @@ interface MappedClass
 
     public static function getRSIndexName(): string;
 
+    public static function getRSIndexDocumentPrefix(): ?string;
+
     /**
      * @param object $instance
      *

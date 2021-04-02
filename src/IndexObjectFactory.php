@@ -21,6 +21,7 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration;
 
+use MacFJA\RediSearch\Aggregate;
 use MacFJA\RediSearch\Index;
 use MacFJA\RediSearch\Search;
 use MacFJA\RediSearch\Suggestions;
@@ -40,4 +41,6 @@ interface IndexObjectFactory
     public function getRedisClient(): Client;
 
     public function getEventDispatcher(): EventDispatcherInterface;
+
+    public function getAggregate(): Aggregate;
 }

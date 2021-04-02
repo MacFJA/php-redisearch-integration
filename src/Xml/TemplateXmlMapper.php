@@ -66,6 +66,17 @@ abstract class TemplateXmlMapper implements MappedClass
         return (string) ($data['indexname'] ?? $data['name']);
     }
 
+    public static function getRSIndexDocumentPrefix(): ?string
+    {
+        $data = self::getXmlData();
+
+        if (isset($data['documentprefix'])) {
+            return (string) $data['documentprefix'];
+        }
+
+        return null;
+    }
+
     public function getRSDataArray($instance): array
     {
         $data = self::getXmlData();

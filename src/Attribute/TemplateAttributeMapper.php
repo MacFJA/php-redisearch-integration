@@ -74,6 +74,19 @@ abstract class TemplateAttributeMapper implements MappedClass
         return self::getClass();
     }
 
+    public static function getRSIndexDocumentPrefix(): ?string
+    {
+        $reflectionClass = new ReflectionClass(self::getClass());
+        $indexName = $reflectionClass->getAttributes(Index::class);
+        if (1 === count($indexName)) {
+            $indexName = reset($indexName);
+            /** @var Index $indexName */
+            return $indexName->getPrefix();
+        }
+
+        return null;
+    }
+
     public function getRSDataArray($instance): array
     {
         $classname = self::getClass();
