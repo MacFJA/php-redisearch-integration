@@ -50,6 +50,7 @@ class AttributeMapperTest extends TestCase
         self::assertSame($provider->getStaticMappedClass(WithAttribute::class), get_class($mapped));
 
         self::assertSame('tests_annotation', $mapped::getRSIndexName());
+        self::assertSame('person-', $mapped::getRSIndexDocumentPrefix());
         self::assertCount(2, $mapped::getRSFieldsDefinition());
         self::assertEquals([
             new Builder\TextField('firstname', false, null, 'fr'),

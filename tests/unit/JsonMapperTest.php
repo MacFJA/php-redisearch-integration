@@ -59,6 +59,7 @@ class JsonMapperTest extends TestCase
         self::assertSame($provider->getStaticMappedClass(Person::class), get_class($mapped));
 
         self::assertSame('person', $mapped::getRSIndexName());
+        self::assertSame('document', $mapped::getRSIndexDocumentPrefix());
         self::assertCount(4, $mapped::getRSFieldsDefinition());
         self::assertEquals([
             new Builder\TextField('firstname', false, null, 'fr', true),

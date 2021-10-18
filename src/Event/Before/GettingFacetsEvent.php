@@ -19,36 +19,64 @@ declare(strict_types=1);
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace MacFJA\RediSearch\Integration\Annotation;
+namespace MacFJA\RediSearch\Integration\Event\Before;
 
-use Doctrine\Common\Annotations\NamedArgumentConstructorAnnotation;
+use MacFJA\RediSearch\Helper\DataHelper;
 
-/**
- * @Annotation
- * @Target({"CLASS"})
- * @phan-suppress PhanDeprecatedInterface
- */
-class Index implements NamedArgumentConstructorAnnotation
+class GettingFacetsEvent
 {
     /** @var string */
-    private $name;
+    private $classname;
 
-    /** @var null|string */
-    private $prefix;
+    /** @var string */
+    private $query;
 
-    public function __construct(string $name, ?string $prefix = null)
+    /** @var array<string> */
+    private $fields;
+
+    /**
+     * @param array<string> $fields
+     */
+    public function __construct(string $classname, string $query, array $fields)
     {
-        $this->name = $name;
-        $this->prefix = $prefix;
+        $this->classname = $classname;
+        $this->query = $query;
+        $this->fields = $fields;
     }
 
-    public function getName(): string
+    public function getClassname(): string
     {
-        return $this->name;
+        return $this->classname;
     }
 
-    public function getPrefix(): ?string
+    public function getQuery(): string
     {
-        return $this->prefix;
+        return $this->query;
+    }
+
+    public function setQuery(string $query): GettingFacetsEvent
+    {
+        $this->query = $query;
+
+        return $this;
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getFields(): array
+    {
+        return $this->fields;
+    }
+
+    /**
+     * @param array<string> $fields
+     */
+    public function setFields(array $fields): GettingFacetsEvent
+    {
+        DataHelper::assertArrayOf($fields, 'string');
+        $this->fields = $fields;
+
+        return $this;
     }
 }

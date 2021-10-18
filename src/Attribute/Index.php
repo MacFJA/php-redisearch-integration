@@ -30,13 +30,22 @@ class Index implements NamedArgumentConstructorAnnotation
     /** @var string */
     private $name;
 
-    public function __construct(string $name)
+    /** @var null|string */
+    private $prefix;
+
+    public function __construct(string $name, ?string $prefix = null)
     {
         $this->name = $name;
+        $this->prefix = $prefix;
     }
 
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getPrefix(): ?string
+    {
+        return $this->prefix;
     }
 }

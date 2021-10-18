@@ -19,67 +19,67 @@ declare(strict_types=1);
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace MacFJA\RediSearch\Integration\Annotation;
+namespace MacFJA\RediSearch\Integration\Event\After;
 
-use Doctrine\Common\Annotations\NamedArgumentConstructorAnnotation;
-
-/**
- * @Annotation
- * @Target({"PROPERTY", "METHOD"})
- * @phan-suppress PhanDeprecatedInterface
- */
-class Suggestion implements NamedArgumentConstructorAnnotation
+class GettingFacetsEvent
 {
-    public const TYPE_FULL = 'full';
-
-    public const TYPE_WORD = 'word';
+    /** @var string */
+    private $classname;
 
     /** @var string */
-    private $group;
+    private $query;
 
-    /** @var string */
-    private $type;
+    /** @var array<string> */
+    private $fields;
 
-    /** @var null|string */
-    private $payload;
+    /** @var array<string,array<string,int>> */
+    private $facets;
 
-    /** @var float */
-    private $score;
-
-    /** @var bool */
-    private $increment;
-
-    public function __construct(string $group = 'suggestion', float $score = 1.0, string $type = self::TYPE_FULL, bool $increment = false, ?string $payload = null)
+    /**
+     * @param array<string>                   $fields
+     * @param array<string,array<string,int>> $facets
+     */
+    public function __construct(string $classname, string $query, array $fields, array $facets)
     {
-        $this->group = $group;
-        $this->type = $type;
-        $this->score = $score;
-        $this->payload = $payload;
-        $this->increment = $increment;
+        $this->classname = $classname;
+        $this->query = $query;
+        $this->fields = $fields;
+        $this->facets = $facets;
     }
 
-    public function getGroup(): string
+    public function getClassname(): string
     {
-        return $this->group;
+        return $this->classname;
     }
 
-    public function getType(): string
+    public function getQuery(): string
     {
-        return $this->type;
+        return $this->query;
     }
 
-    public function getPayload(): ?string
+    /**
+     * @return array<string>
+     */
+    public function getFields(): array
     {
-        return $this->payload;
+        return $this->fields;
     }
 
-    public function getScore(): float
+    /**
+     * @return array<string,array<string,int>>
+     */
+    public function getFacets(): array
     {
-        return $this->score;
+        return $this->facets;
     }
 
-    public function isIncrement(): bool
+    /**
+     * @param array<string,array<string,int>> $facets
+     */
+    public function setFacets(array $facets): GettingFacetsEvent
     {
-        return $this->increment;
+        $this->facets = $facets;
+
+        return $this;
     }
 }

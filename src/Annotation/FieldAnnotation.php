@@ -24,6 +24,9 @@ namespace MacFJA\RediSearch\Integration\Annotation;
 use Doctrine\Common\Annotations\NamedArgumentConstructorAnnotation;
 use MacFJA\RediSearch\Index\Builder\Field;
 
+/**
+ * @phan-suppress PhanDeprecatedInterface
+ */
 interface FieldAnnotation extends NamedArgumentConstructorAnnotation
 {
     public function getField(string $name): Field;

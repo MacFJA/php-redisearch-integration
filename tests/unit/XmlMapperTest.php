@@ -54,6 +54,7 @@ class XmlMapperTest extends TestCase
         self::assertSame($provider->getStaticMappedClass(Person::class), get_class($mapped));
 
         self::assertSame('person', $mapped::getRSIndexName());
+        self::assertSame('document-id-', $mapped::getRSIndexDocumentPrefix());
         self::assertCount(4, $mapped::getRSFieldsDefinition());
         self::assertEquals([
             new Builder\TextField('firstname', false, 1.0, 'fr', true),

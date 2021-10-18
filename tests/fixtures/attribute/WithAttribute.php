@@ -26,7 +26,7 @@ use MacFJA\RediSearch\Integration\Attribute\Index;
 use MacFJA\RediSearch\Integration\Attribute\Suggestion;
 use MacFJA\RediSearch\Integration\Attribute\TextField;
 
-#[Index(name: "tests_attribute")]
+#[Index(name: "tests_attribute", prefix: "person-")]
 class WithAttribute
 {
     #[TextField(phonetic: "fr")]

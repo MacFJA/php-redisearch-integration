@@ -51,6 +51,7 @@ class ClassMapperTest extends TestCase
         self::assertSame($provider->getStaticMappedClass(Person::class), get_class($mapped));
 
         self::assertSame('person', $mapped::getRSIndexName());
+        self::assertSame('document_', $mapped::getRSIndexDocumentPrefix());
         self::assertCount(3, $mapped::getRSFieldsDefinition());
         self::assertEquals([
             new Builder\TextField('firstname', true, null, 'fr'),

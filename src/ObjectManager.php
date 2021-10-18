@@ -22,16 +22,28 @@ declare(strict_types=1);
 namespace MacFJA\RediSearch\Integration;
 
 use function array_filter;
+use function array_key_exists;
+use function array_reduce;
+use function assert;
 use function count;
+use function current;
 use function get_class;
 use function in_array;
+use function is_array;
+use function is_int;
+use function is_numeric;
 use function is_string;
+use function key;
+use function reset;
+use MacFJA\RediSearch\Aggregate\Reducer;
+use MacFJA\RediSearch\Aggregate\Result as AggregateResult;
 use MacFJA\RediSearch\Helper\PaginatedResult;
 use MacFJA\RediSearch\Index\Builder;
 use MacFJA\RediSearch\Integration\Event\After;
 use MacFJA\RediSearch\Integration\Event\Before;
 use MacFJA\RediSearch\Integration\Exception\NotMappedException;
 use MacFJA\RediSearch\Integration\Exception\UnidentifiableDocumentException;
+use MacFJA\RediSearch\Pipeline;
 use MacFJA\RediSearch\Search;
 use MacFJA\RediSearch\Suggestion\Result;
 use SGH\Comparable\SetFunctions;
@@ -69,12 +81,16 @@ class ObjectManager
         }
 
         $indexName = $mapped::getRSIndexName();
+        $documentPrefix = $mapped::getRSIndexDocumentPrefix();
         $fields = $mapped::getRSFieldsDefinition();
 
         $this->builder->reset();
         $this->builder->withName($indexName);
         foreach ($fields as $field) {
             $this->builder->addField($field);
+        }
+        if (is_string($documentPrefix)) {
+            $this->builder->withPrefix([$documentPrefix]);
         }
 
         /** @var Before\CreatingIndexEvent $event */
@@ -319,5 +335,83 @@ class ObjectManager
             ->execute();
 
         return $search->withResultLimit($preflightResult->getTotalCount())->execute();
+    }
+
+    /**
+     * @param array<string> $fields
+     *
+     * @return array<string,array<string,int>>
+     */
+    public function getFacets(string $classname, string $query, array $fields): array
+    {
+        $mapped = $this->provider->getStaticMappedClass($classname);
+
+        if (null === $mapped) {
+            throw new NotMappedException($classname);
+        }
+
+        $indexName = $mapped::getRSIndexName();
+
+        /** @var Before\GettingFacetsEvent $event */
+        $event = $this->eventDispatcher->dispatch(new Before\GettingFacetsEvent(
+            $classname,
+            $query,
+            $fields
+        ));
+
+        $baseAggregate = $this->objectFactory->getAggregate()->withIndexName($indexName)->withQuery($event->getQuery());
+
+        $pipeline = new Pipeline($this->objectFactory->getRedisClient());
+
+        foreach ($event->getFields() as $field) {
+            $facetAggregate = clone $baseAggregate;
+            $pipeline->addPipeable(
+                $facetAggregate->addGroupBy([$field], [Reducer::count('count')])
+            );
+        }
+
+        $pipelineResult = $pipeline->executePipeline();
+        $facets = [];
+        /** @var PaginatedResult<AggregateResult> $result */
+        foreach ($pipelineResult as $result) {
+            $items = $result->getItems();
+            $facets = array_reduce($items, function ($carry, AggregateResult $item) {
+                $fields = $item->getFields();
+
+                $count = $fields['count'];
+                assert(is_numeric($count));
+                $count = (int) $count;
+                unset($fields['count']);
+
+                reset($fields);
+                $field = (string) key($fields);
+                $fieldValue = current($fields);
+                assert(is_string($fieldValue) || is_int($fieldValue));
+                $fieldValue = (string) $fieldValue;
+
+                if (!array_key_exists($field, $carry)) {
+                    $carry[$field] = [];
+                }
+                if (!array_key_exists($fieldValue, $carry[$field])) {
+                    $carry[$field][$fieldValue] = [];
+                }
+
+                $carry[$field][$fieldValue] = $count;
+
+                return $carry;
+            }, $facets);
+        }
+        assert(is_array($facets));
+
+        /** @var After\GettingFacetsEvent $afterEvent */
+        $afterEvent = $this->eventDispatcher->dispatch(new After\GettingFacetsEvent(
+            $classname,
+            $event->getQuery(),
+            $event->getFields(),
+            // @phan-suppress-next-line PhanPartialTypeMismatchArgument
+            $facets
+        ));
+
+        return $afterEvent->getFacets();
     }
 }

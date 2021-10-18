@@ -2,6 +2,7 @@
   {
     "class": "MacFJA\\RediSearch\\Integration\\tests\\fixtures\\json\\Person",
     "index": "person",
+    "document-prefix": "document",
     "stop-words": ["the", "redis"],
     "id": { "name": "getId", "type": "getter" },
     "fields": {
