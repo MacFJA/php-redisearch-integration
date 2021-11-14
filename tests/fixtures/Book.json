@@ -1,0 +1,49 @@
+[
+  {
+    "class": "MacFJA\\RediSearch\\Integration\\tests\\fixtures\\Book",
+    "index": "books",
+    "document-prefix": "book-",
+    "stop-words": [
+      "volume",
+      "chapter"
+    ],
+    "id": {
+      "name": "getIdentifier",
+      "type": "getter"
+    },
+    "fields": {
+      "rawIsbn": {
+        "property": "isbn",
+        "type": "tag",
+        "sortable": false,
+        "noindex": false
+      },
+      "isbn": {
+        "getter": "getNormalizedIsbn",
+        "type": "tag"
+      },
+      "page": {
+        "type": "numeric"
+      },
+      "author": {
+        "getter": "getAuthor",
+        "type": "tag",
+        "sortable": true,
+        "noindex": false
+      },
+      "title": {
+        "getter": "getTitle",
+        "type": "text"
+      }
+    },
+    "suggestions": [
+      {
+        "property": "title"
+      },
+      {
+        "property": "author",
+        "group": "person"
+      }
+    ]
+  }
+]

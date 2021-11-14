@@ -69,14 +69,6 @@
     <xs:complexType name="suggestionType">
         <xs:attribute type="xs:string" name="name" use="required"/>
         <xs:attribute type="xs:float" name="score" use="optional"/>
-        <xs:attribute name="type" use="optional">
-            <xs:simpleType xml:base="xs:string">
-                <xs:restriction>
-                    <xs:enumeration value="word" />
-                    <xs:enumeration value="full" />
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
         <xs:attribute type="xs:string" name="payload" use="optional"/>
         <xs:attribute type="xs:string" name="group" use="optional"/>
         <xs:attribute type="xs:boolean" name="increment" use="optional"/>
@@ -106,6 +98,7 @@
         </xs:sequence>
         <xs:attribute type="xs:string" name="name" use="required"/>
         <xs:attribute type="xs:string" name="indexname" use="optional"/>
+        <xs:attribute type="xs:string" name="documentprefix" use="optional"/>
     </xs:complexType>
     <xs:complexType name="RediSearchType">
         <xs:sequence>

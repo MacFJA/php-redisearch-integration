@@ -22,42 +22,55 @@ declare(strict_types=1);
 namespace MacFJA\RediSearch\Integration\Json;
 
 use function array_key_exists;
-use function defined;
-use function file_get_contents;
 use function function_exists;
+use function get_class;
 use function is_array;
-use function json_decode;
-use MacFJA\RediSearch\Integration\Exception\DuplicateDefinitionException;
-use MacFJA\RediSearch\Integration\Helper\CommonMapperMethods;
-use MacFJA\RediSearch\Integration\MappedClassProvider;
+use function is_string;
+use MacFJA\RediSearch\Integration\Mapping;
+use MacFJA\RediSearch\Integration\MappingProvider;
 
-class JsonProvider implements MappedClassProvider
+class JsonProvider implements MappingProvider
 {
-    use CommonMapperMethods;
+    /**
+     * @var array<string,JsonMapping>
+     */
+    private $mappings = [];
 
-    public function addJson(string $file): void
+    public function addJson(string $path): void
     {
-        if (!function_exists('json_decode') || !defined('JSON_THROW_ON_ERROR')) {
+        if (!function_exists('json_decode')) {
             return;
         }
-        $rawJson = @file_get_contents($file);
-        if (false === $rawJson) {
+        if (!file_exists($path)) {
             return;
         }
-        $json = json_decode($rawJson, true, 5, \JSON_THROW_ON_ERROR);
+        $content = file_get_contents($path);
+        if (!is_string($content)) {
+            return;
+        }
+        $json = json_decode($content, true);
+
         if (!is_array($json)) {
             return;
         }
-        foreach ($json as $definition) {
-            if (array_key_exists($definition['class'], $this->mapped)) {
-                throw new DuplicateDefinitionException($definition['class']);
+
+        foreach ($json as $mapping) {
+            if (!array_key_exists('class', $mapping)) {
+                continue;
             }
-            $anonymous = new class() extends TemplateJsonMapper {
-            };
-
-            $anonymous::init($definition);
-
-            $this->addMapping($definition['class'], $anonymous);
+            $this->mappings[$mapping['class']] = new JsonMapping($mapping);
         }
+    }
+
+    public function getMapping($instance): ?Mapping
+    {
+        $class = is_string($instance) ? $instance : get_class($instance);
+
+        return $this->mappings[$class] ?? null;
+    }
+
+    public function hasMappingFor(string $class): bool
+    {
+        return array_key_exists($class, $this->mappings);
     }
 }

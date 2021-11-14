@@ -1,20 +1,13 @@
 parameters:
-  checkGenericClassInNonGenericObjectType: false
-  treatPhpDocTypesAsCertain: false
-  dynamicConstantNames:
-      - ReflectionAttribute::IS_INSTANCEOF
-  ignoreErrors:
-      - '#Call to an undefined method Reflection(.+)::getAttributes\(\)\.#'
-      - '#Access to constant IS_INSTANCEOF on an unknown class ReflectionAttribute\.#'
-      - '#type has no value type specified in iterable type Predis\\Client#'
-      -
-          message: '#Method MacFJA\\RediSearch\\Integration\\Xml\\TemplateXmlMapper::castAttributeOrNull\(\) never returns #'
-          path: src/Xml/TemplateXmlMapper.php
-      -
-          message: '#Method MacFJA\\RediSearch\\Integration\\Xml\\TemplateXmlMapper::castAttributeOrNull\(\) should return #'
-          path: src/Xml/TemplateXmlMapper.php
+    level: 8
+    phpVersion: 70200
+    paths:
+        - src
+        - tests
+    ignoreErrors:
+        - '#Call to an undefined method Reflection([\w<>]+)::getAttributes\(\)\.#'
 services:
     -
-        class: \MacFJA\RediSearch\Integration\tests\phpstan\XmlCastAttribute
+        class: \MacFJA\RediSearch\Integration\tests\phpstan\PsrEventDispatcher
         tags:
-            - phpstan.broker.dynamicStaticMethodReturnTypeExtension
+            - phpstan.broker.dynamicMethodReturnTypeExtension

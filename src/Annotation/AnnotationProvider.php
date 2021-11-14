@@ -22,17 +22,25 @@ declare(strict_types=1);
 namespace MacFJA\RediSearch\Integration\Annotation;
 
 use function array_key_exists;
-use function assert;
-use function class_exists;
+use function count;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
-use MacFJA\RediSearch\Integration\Helper\CommonDynamicMapperMethods;
-use MacFJA\RediSearch\Integration\MappedClass;
-use MacFJA\RediSearch\Integration\MappedClassProvider;
+use function get_class;
+use function is_string;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\DocumentId;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\GeoField;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\Index;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\NumericField;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\Suggestion;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\TagField;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\TextField;
+use MacFJA\RediSearch\Integration\Mapping;
+use MacFJA\RediSearch\Integration\MappingProvider;
 
-class AnnotationProvider implements MappedClassProvider
+class AnnotationProvider implements MappingProvider
 {
-    use CommonDynamicMapperMethods;
+    /** @var array<string,null|AnnotationMapping> */
+    private $mappings = [];
 
     public function __construct()
     {
@@ -48,32 +56,27 @@ class AnnotationProvider implements MappedClassProvider
         AnnotationRegistry::loadAnnotationClass(TextField::class);
     }
 
-    /**
-     * @param string|class-string $classname
-     */
-    protected function getMapped(string $classname): ?MappedClass
+    public function getMapping($instance): ?Mapping
     {
         if (!class_exists(AnnotationReader::class)) {
             return null;
         }
-        if (!class_exists($classname)) {
-            return null;
-        }
-        if (!array_key_exists($classname, $this->mapped)) {
-            $anonymous = new class() extends TemplateAnnotationMapper {
-            };
+        $class = is_string($instance) ? $instance : get_class($instance);
+        if (!array_key_exists($class, $this->mappings) && class_exists($class)) {
+            $mapping = new AnnotationMapping($class);
+            if (0 === count($mapping->getFields())) {
+                $this->mappings[$class] = null;
 
-            $anonymous::init($classname);
-
-            $this->mapped[$classname] = $anonymous;
-            if (!$anonymous::isValid()) {
-                $this->mapped[$classname] = null;
+                return null;
             }
+            $this->mappings[$class] = $mapping;
         }
 
-        $mapped = $this->mapped[$classname];
-        assert($mapped instanceof TemplateAnnotationMapper || null === $mapped);
+        return $this->mappings[$class] ?? null;
+    }
 
-        return $mapped;
+    public function hasMappingFor(string $class): bool
+    {
+        return class_exists(AnnotationReader::class) && $this->getMapping($class) instanceof AnnotationMapping;
     }
 }

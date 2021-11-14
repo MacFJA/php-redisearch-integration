@@ -21,20 +21,21 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\tests\fixtures\annotation;
 
-use MacFJA\RediSearch\Integration\Annotation\DocumentId;
-use MacFJA\RediSearch\Integration\Annotation\GeoField;
-use MacFJA\RediSearch\Integration\Annotation\Index;
-use MacFJA\RediSearch\Integration\Annotation\NumericField;
-use MacFJA\RediSearch\Integration\Annotation\Suggestion;
-use MacFJA\RediSearch\Integration\Annotation\TagField;
-use MacFJA\RediSearch\Integration\Annotation\TextField;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\DocumentId;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\GeoField;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\Index;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\NumericField;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\Suggestion;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\TagField;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\TextField;
 
 /**
- * @Index(name="tests_annotation")
+ * @Index(name="tests_annotation", prefix="document-")
  */
 class WithAnnotation
 {
     /**
+     * @var string
      * @TextField(phonetic="fr")
      * @Suggestion(group="name")
      */
@@ -57,7 +58,7 @@ class WithAnnotation
      * @TextField(name="lastname")
      * @Suggestion(group="name")
      */
-    public function getLastname()
+    public function getLastname(): string
     {
         return 'Doe';
     }

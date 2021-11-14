@@ -21,7 +21,12 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\Event\After;
 
-class RemovingDocumentFromSearchEvent
+use MacFJA\RediSearch\Integration\Event\Event;
+
+/**
+ * @codeCoverageIgnore Value object
+ */
+class RemovingDocumentFromSearchEvent implements Event
 {
     /** @var object */
     private $instance;

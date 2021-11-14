@@ -21,26 +21,27 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\Event\Before;
 
-use MacFJA\RediSearch\Index\Builder;
+use MacFJA\RediSearch\IndexBuilder;
+use MacFJA\RediSearch\Integration\Event\Event;
 
-class CreatingIndexEvent
+/**
+ * @codeCoverageIgnore Value object
+ */
+class CreatingIndexEvent implements Event
 {
-    /** @var Builder */
+    /** @var IndexBuilder */
     private $builder;
 
     /** @var string */
     private $classname;
 
-    /**
-     * BeforeCreateIndexEvent constructor.
-     */
-    public function __construct(Builder $builder, string $classname)
+    public function __construct(IndexBuilder $builder, string $classname)
     {
         $this->builder = $builder;
         $this->classname = $classname;
     }
 
-    public function setBuilder(Builder $builder): CreatingIndexEvent
+    public function setBuilder(IndexBuilder $builder): CreatingIndexEvent
     {
         $this->builder = $builder;
 
@@ -52,7 +53,7 @@ class CreatingIndexEvent
         return $this->classname;
     }
 
-    public function getBuilder(): Builder
+    public function getBuilder(): IndexBuilder
     {
         return $this->builder;
     }

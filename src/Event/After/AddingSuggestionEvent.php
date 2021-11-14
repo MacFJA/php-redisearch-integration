@@ -21,7 +21,12 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\Event\After;
 
-class AddingSuggestionEvent
+use MacFJA\RediSearch\Integration\Event\Event;
+
+/**
+ * @codeCoverageIgnore Value object
+ */
+class AddingSuggestionEvent implements Event
 {
     /** @var string */
     private $group;
@@ -29,7 +34,7 @@ class AddingSuggestionEvent
     /** @var string */
     private $suggestion;
 
-    /** @var float */
+    /** @var null|float */
     private $score;
 
     /** @var bool */
@@ -41,10 +46,7 @@ class AddingSuggestionEvent
     /** @var object */
     private $instance;
 
-    /**
-     * BeforeAddingSuggestionEvent constructor.
-     */
-    public function __construct(string $group, string $suggestion, float $score, bool $increment, ?string $payload, object $instance)
+    public function __construct(string $group, string $suggestion, ?float $score, bool $increment, ?string $payload, object $instance)
     {
         $this->group = $group;
         $this->suggestion = $suggestion;
@@ -64,7 +66,7 @@ class AddingSuggestionEvent
         return $this->suggestion;
     }
 
-    public function getScore(): float
+    public function getScore(): ?float
     {
         return $this->score;
     }

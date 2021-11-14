@@ -21,48 +21,56 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration;
 
+use BadMethodCallException;
+use Exception;
+use function get_class;
 use function is_string;
-use MacFJA\RediSearch\Integration\Annotation\AnnotationProvider;
-use MacFJA\RediSearch\Integration\Attribute\AttributeProvider;
+use function strlen;
 
-class CompositeProvider implements MappedClassProvider
+class CompositeProvider implements MappingProvider
 {
-    /** @var array<MappedClassProvider> */
-    protected $providers;
+    /** @var array<MappingProvider> */
+    private $providers;
 
-    public function __construct()
+    /**
+     * @param string       $name
+     * @param array<mixed> $arguments
+     */
+    public function __call($name, $arguments): void
     {
-        $this->providers = [new ClassProvider(), new AnnotationProvider(), new AttributeProvider()];
-    }
+        if (strlen($name) > 3 && 0 === strpos($name, 'add') && $name[3] === strtoupper($name[3])) {
+            foreach ($this->providers as $provider) {
+                if (method_exists($provider, $name)) {
+                    try {
+                        $provider->{$name}(...$arguments);
 
-    public function addProvider(MappedClassProvider $provider): void
-    {
-        $this->providers[] = $provider;
-    }
-
-    public function removeAllProviders(): void
-    {
-        $this->providers = [];
-    }
-
-    public function getStaticMappedClass(string $class): ?string
-    {
-        foreach ($this->providers as $classProvider) {
-            $mapped = $classProvider->getStaticMappedClass($class);
-            if (is_string($mapped)) {
-                return $mapped;
+                        return;
+                    } catch (Exception $e) {
+                        // Do nothing
+                    }
+                }
             }
         }
 
-        return null;
+        throw new BadMethodCallException('Method "'.$name.'" does not exists.');
     }
 
-    public function getMappedClass($instance): ?MappedClass
+    public function addProvider(MappingProvider $provider, bool $prepend = false): void
     {
-        foreach ($this->providers as $classProvider) {
-            $mapped = $classProvider->getMappedClass($instance);
-            if ($mapped instanceof MappedClass) {
-                return $mapped;
+        if (true === $prepend) {
+            array_unshift($this->providers, $provider);
+
+            return;
+        }
+        $this->providers[] = $provider;
+    }
+
+    public function getMapping($instance): ?Mapping
+    {
+        $class = is_string($instance) ? $instance : get_class($instance);
+        foreach ($this->providers as $provider) {
+            if ($provider->hasMappingFor($class)) {
+                return $provider->getMapping($instance);
             }
         }
 
@@ -71,8 +79,8 @@ class CompositeProvider implements MappedClassProvider
 
     public function hasMappingFor(string $class): bool
     {
-        foreach ($this->providers as $classProvider) {
-            if ($classProvider->hasMappingFor($class)) {
+        foreach ($this->providers as $provider) {
+            if ($provider->hasMappingFor($class)) {
                 return true;
             }
         }

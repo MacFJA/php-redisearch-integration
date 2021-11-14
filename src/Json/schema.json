@@ -67,7 +67,6 @@
         "required": ["property"],
         "properties": {
           "property": { "type": "string" },
-          "type": { "type": "string", "pattern": "(word|full)" },
           "payload": { "type": "string" },
           "score": { "type": "number" },
           "group": { "type": "string" },
@@ -79,7 +78,6 @@
         "required": ["getter"],
         "properties": {
           "getter": { "type": "string" },
-          "type": { "type": "string", "pattern": "(word|full)" },
           "payload": { "type": "string" },
           "score": { "type": "number" },
           "group": { "type": "string" },
@@ -99,6 +97,10 @@
     ],
     "additionalProperties": false,
     "properties": {
+      "id": {
+        "$id": "#root/items/id",
+        "$ref": "#/$defs/id"
+      },
       "class": {
         "$id": "#root/items/class",
         "title": "Class",
@@ -109,6 +111,13 @@
       "index": {
         "$id": "#root/items/index",
         "title": "Index",
+        "type": "string",
+        "default": "",
+        "pattern": "^.*$"
+      },
+      "document-prefix": {
+        "$id": "#root/items/document-prefix",
+        "title": "Index Document Prefix",
         "type": "string",
         "default": "",
         "pattern": "^.*$"

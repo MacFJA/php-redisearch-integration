@@ -22,47 +22,63 @@ declare(strict_types=1);
 namespace MacFJA\RediSearch\Integration\Xml;
 
 use function array_key_exists;
-use function class_exists;
-use function file_get_contents;
-use function function_exists;
-use function simplexml_load_string;
-use MacFJA\RediSearch\Integration\Exception\InvalidClassException;
-use MacFJA\RediSearch\Integration\Helper\CommonMapperMethods;
-use MacFJA\RediSearch\Integration\MappedClassProvider;
+use DOMDocument;
+use DOMNamedNodeMap;
+use DOMNode;
+use DOMXPath;
+use function get_class;
+use function is_string;
+use MacFJA\RediSearch\Integration\Mapping;
+use MacFJA\RediSearch\Integration\MappingProvider;
 
-class XmlProvider implements MappedClassProvider
+class XmlProvider implements MappingProvider
 {
-    use CommonMapperMethods;
+    /** @var array<string,XmlMapping> */
+    private $mappings = [];
 
     public function addXml(string $file): void
     {
-        if (!function_exists('simplexml_load_file')) {
+        if (!class_exists(DOMDocument::class)) {
             return;
         }
         $rawXml = file_get_contents($file);
         if (false === $rawXml) {
             return;
         }
-        $xml = simplexml_load_string($rawXml);
-        if (false === $xml) {
+        $xml = new DOMDocument();
+        $success = $xml->loadXML($rawXml);
+        if (false === $success) {
             return;
         }
-        foreach ($xml as $definition) {
-            $class = (string) $definition['name'];
-
-            if (!class_exists($class)) {
-                throw new InvalidClassException($class);
+        /** @var DOMNode $classNode */
+        foreach ((new DOMXPath($xml))->query('//class') ?: [] as $classNode) {
+            $attributes = $classNode->attributes;
+            if (!$attributes instanceof DOMNamedNodeMap) {
+                continue;
             }
-
-            if (array_key_exists($class, $this->mapped)) {
-                throw new InvalidClassException($class);
+            $classnameNode = $attributes->getNamedItem('name');
+            if (null === $classnameNode) {
+                continue;
             }
-            $anonymous = new class() extends TemplateXmlMapper {
-            };
+            $class = $classnameNode->textContent;
 
-            $anonymous::init($definition);
+            $document = new DOMDocument();
+            $document->appendChild($document->importNode($classNode, true));
+            $mapping = new XmlMapping($document);
 
-            $this->addMapping($class, $anonymous);
+            $this->mappings[$class] = $mapping;
         }
+    }
+
+    public function getMapping($instance): ?Mapping
+    {
+        $class = is_string($instance) ? $instance : get_class($instance);
+
+        return $this->mappings[$class] ?? null;
+    }
+
+    public function hasMappingFor(string $class): bool
+    {
+        return array_key_exists($class, $this->mappings);
     }
 }

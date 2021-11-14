@@ -22,57 +22,39 @@ declare(strict_types=1);
 namespace MacFJA\RediSearch\Integration\Attribute;
 
 use function array_key_exists;
-use function assert;
-use function class_exists;
-use function method_exists;
-use Attribute;
-use MacFJA\RediSearch\Integration\Helper\CommonDynamicMapperMethods;
-use MacFJA\RediSearch\Integration\MappedClass;
-use MacFJA\RediSearch\Integration\MappedClassProvider;
+use function count;
+use function get_class;
+use function is_string;
+use MacFJA\RediSearch\Integration\Mapping;
+use MacFJA\RediSearch\Integration\MappingProvider;
 use ReflectionAttribute;
-use ReflectionClass;
-use ReflectionMethod;
-use ReflectionProperty;
 
-class AttributeProvider implements MappedClassProvider
+class AttributeProvider implements MappingProvider
 {
-    use CommonDynamicMapperMethods;
+    /** @var array<string,null|AttributeMapping> */
+    private $mappings = [];
 
-    /**
-     * @param string|class-string $classname
-     */
-    protected function getMapped(string $classname): ?MappedClass
+    public function getMapping($instance): ?Mapping
     {
-        if (!$this->isSupported()) {
+        if (!class_exists(ReflectionAttribute::class)) {
             return null;
         }
-        if (!class_exists($classname)) {
-            return null;
-        }
-        if (!array_key_exists($classname, $this->mapped)) {
-            $anonymous = new class() extends TemplateAttributeMapper {
-            };
+        $class = is_string($instance) ? $instance : get_class($instance);
+        if (!array_key_exists($class, $this->mappings) && class_exists($class)) {
+            $mapping = new AttributeMapping($class);
+            if (0 === count($mapping->getFields())) {
+                $this->mappings[$class] = null;
 
-            $anonymous::init($classname);
-
-            $this->mapped[$classname] = $anonymous;
-            if (!$anonymous::isValid()) {
-                $this->mapped[$classname] = null;
+                return null;
             }
+            $this->mappings[$class] = $mapping;
         }
 
-        $mapped = $this->mapped[$classname];
-        assert($mapped instanceof TemplateAttributeMapper || null === $mapped);
-
-        return $mapped;
+        return $this->mappings[$class] ?? null;
     }
 
-    private function isSupported(): bool
+    public function hasMappingFor(string $class): bool
     {
-        return class_exists(ReflectionAttribute::class)
-            && class_exists(Attribute::class)
-            && method_exists(ReflectionClass::class, 'getAttributes')
-            && method_exists(ReflectionMethod::class, 'getAttributes')
-            && method_exists(ReflectionProperty::class, 'getAttributes');
+        return class_exists(ReflectionAttribute::class) && $this->getMapping($class) instanceof AttributeMapping;
     }
 }

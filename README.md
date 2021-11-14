@@ -10,39 +10,37 @@ composer require macfja/redisearch-integration
 
 ## Usage
 
-You mainly will be using the `ObjectManager` (`\MacFJA\RediSearch\Integration\ObjectManager`).
+You will mainly use `ObjectManager` (`\MacFJA\RediSearch\Integration\ObjectManager`) and `ObjectRepository` (`\MacFJA\RediSearch\Integration\ObjectRepository`).  
+
+This 2 interfaces are bundle into the `ObjectWorker` (`\MacFJA\RediSearch\Integration\ObkectWorker`) class, to ease usage.
+_(If you are using a good Injection dependency, you will only need the interface)_
 
 ```php
 use MacFJA\RediSearch\Integration\CompositeProvider;
-use MacFJA\RediSearch\Integration\ObjectManager;
-use MacFJA\RediSearch\Integration\IndexObjectFactory;
-use MacFJA\RediSearch\Integration\Json\JsonProvider;
+use MacFJA\RediSearch\Integration\ObjectWorker;
+use MacFJA\RediSearch\Redis\Client\ClientFacade;
 
-$factory = new class implements IndexObjectFactory {
-    // TODO: Implement getIndexBuilder() method.
-    // TODO: Implement getSearch() method.
-    // TODO: Implement getIndex() method.
-    // TODO: Implement getSuggestion() method.
-    // TODO: Implement getRedisClient() method.
-    // TODO: Implement getEventDispatcher() method.
-}};
 $jsonProvider = new JsonProvider();
 $jsonProvider->addJson(__DIR__.'/mappings.json');
 $provider = new CompositeProvider(); // Annotation, Attribute, class implementation
 $provider->addProvider($jsonProvider); // Add JSON as provider source
 
-$manager = new ObjectManager($factory, $provider);
+$client = (new ClientFacade())->getClient(/* .. */);
+
+$manager = new ObjectWorker($client, $provider);
 // ...
 $manager->createIndex(\MyApp\Model\Product::class);
+// $manager->flush(); If you need the index to create directly 
 // ...
 $entity = \MyApp\Model\Product();
-$manager->addObject($entity); // Add object in search and build suggestions
+$manager->persist($entity); // Add object in search and build suggestions
+$manager->flush();
 // ...
-$searchResult = $manager->getSearchBuilder(\MyApp\Model\Product::class)
-    ->withQuery((new MacFJA\RediSearch\Search\QueryBuilder())->addNumericFacet('price', 0, 15)->render())
-    ->withResultOffset(0)
-    ->withResultLimit(12)
-    ->execute();
+$searchResult = $client->execute(
+    $manager->getSearchCommand(\MyApp\Model\Product::class)
+        ->setQuery((new MacFJA\RediSearch\Query\Builder())->addNumericFacet('price', 0, 15)->render())
+        ->setLimit(0, 12)
+);
 // ...
 $suggestions = $manager->getSuggestions(\MyApp\Model\Product::class, 'shoe');
 ```
@@ -72,13 +70,12 @@ Annotation | PHP 8 Attribute | Scope | Default
 `@Suggestion` | `#[Suggestion]` | Property or Method | _None_
 
 Annotation and PHP 8 attribute mapping are parsed by respectively `\MacFJA\RediSearch\Integration\Annotation\AnnotationProvider` and `\MacFJA\RediSearch\Integration\Attribute\AttributeProvider`.
-Both are enabled by default in the `\MacFJA\RediSearch\Integration\CompositeProvider`.
 
 #### The `Index` mapping
 
-The `@Index(name)` (or `#[Index(name)]` for PHP 8 attribute) allow you to specify the index where the class will be put.
+The `@Index(name, [prefix], [stopsWords])` (or `#[Index(name, [prefix], [stopsWords])]` for PHP 8 attribute) allow you to specify the index where the class will be put.
 
-If the mapping is missing, the Full Class Qualifier Name (namespace + classname) will be used.
+If the mapping is missing, the Full Class Qualifier Name (namespace + classname) will be used as index name, not prefix will be used and default StopsWorlds will be used.
 
 #### The `DocumentId` mapping
 
@@ -89,7 +86,7 @@ If the mapping is missing, a random hash will be generated.
 
 #### The `TextField` mapping
 
-The `@TextField([name], [noStem], [weight], [phonetic], [sortable], [noIndex])` (or `#[TextField([name], [noStem], [weight], [phonetic], [sortable], [noIndex])]` for PHP 8 attribute) allow you to add a text in the search engine.
+The `@TextField([name], [noStem], [weight], [phonetic], [sortable], [noIndex], [unNormalized])` (or `#[TextField([name], [noStem], [weight], [phonetic], [sortable], [noIndex], [unNormalized])]` for PHP 8 attribute) allow you to add a text in the search engine.
 The mapping can be set on a property, or on a method that can be call without any parameter.
 
 - The `name` parameter is used to specify the name of the data in RediSearch. If missing the property name will be used, or the name of the method base on getter rule (`get`/`is`).
@@ -98,53 +95,49 @@ The mapping can be set on a property, or on a method that can be call without an
 - The `phonetic` parameter is a string used to indicate the language to use for phonetic search.
 - The `sortable` parameter is a boolean used to indicate if the data can be used to sort result.
 - The `noIndex` parameter is a boolean used to indicate if the data should be searchable or not.
+- The `unNormalized` parameter is a boolean used to indicate if the data should be searchable or not.
 
 #### The `NumericField` mapping
 
-The `@NumericField([name], [sortable], [noIndex])` (or `#[NumericField([name], [sortable], [noIndex])]` for PHP 8 attribute) allow you to add a number in the search engine.
+The `@NumericField([name], [sortable], [noIndex], [unNormalized])` (or `#[NumericField([name], [sortable], [noIndex], [unNormalized])]` for PHP 8 attribute) allow you to add a number in the search engine.
 The mapping can be set on a property, or on a method that can be call without any parameter.
 
 - The `name` parameter is used to specify the name of the data in RediSearch. If missing the property name will be used, or the name of the method base on getter rule (`get`/`is`).
 - The `sortable` parameter is a boolean used to indicate if the data can be used to sort result.
 - The `noIndex` parameter is a boolean used to indicate if the data should be searchable or not.
+- The `unNormalized` parameter is a boolean used to indicate if the data should be searchable or not.
 
 #### The `TagField` mapping
 
-The `@TagField([name], [separator], [sortable], [noIndex])` (or `#[TagField([name], [separator], [sortable], [noIndex])]` for PHP 8 attribute) allow you to add a text in the search engine.
+The `@TagField([name], [separator], [sortable], [noIndex], [unNormalized])` (or `#[TagField([name], [separator], [sortable], [noIndex], [unNormalized])]` for PHP 8 attribute) allow you to add a text in the search engine.
 The mapping can be set on a property, or on a method that can be call without any parameter.
 
 - The `name` parameter is used to specify the name of the data in RediSearch. If missing the property name will be used, or the name of the method base on getter rule (`get`/`is`).
 - The `separator` parameter is a string used to indicate char to use to separate values.
 - The `sortable` parameter is a boolean used to indicate if the data can be used to sort result.
 - The `noIndex` parameter is a boolean used to indicate if the data should be searchable or not.
+- The `unNormalized` parameter is a boolean used to indicate if the data should be searchable or not.
 
 The data link to `TagField` can be a scalar data, or a simple array (one dimension) of scalar
 
 #### The `GeoField` mapping
 
-The `@GeoField([name], [noIndex])` (or `#[GeoField([name], [noIndex])]` for PHP 8 attribute) allow you to add a geographic (coordinate) in the search engine.
+The `@GeoField([name], [noIndex], [sortable], [unNormalized])` (or `#[GeoField([name], [noIndex], [sortable], [unNormalized])]` for PHP 8 attribute) allow you to add a geographic (coordinate) in the search engine.
 The mapping can be set on a property, or on a method that can be call without any parameter.
 
 - The `name` parameter is used to specify the name of the data in RediSearch. If missing the property name will be used, or the name of the method base on getter rule (`get`/`is`).
 - The `noIndex` parameter is a boolean used to indicate if the data should be searchable or not.
+- The `unNormalized` parameter is a boolean used to indicate if the data should be searchable or not.
 
 #### The `Suggestion` mapping
 
-The `@Suggestion([group], [score], [type], [increment], [payload])` (or `#[GeoField([group], [score], [type], [increment], [payload])]` for PHP 8 attribute) allow you to add a geographic (coordinate) in the search engine.
+The `@Suggestion([group], [score], [increment], [payload])` (or `#[GeoField([group], [score], [increment], [payload])]` for PHP 8 attribute) allow you to add a geographic (coordinate) in the search engine.
 The mapping can be set on a property, or on a method that can be call without any parameter.
 
 - The `group` parameter is used to specify the name of the suggestion registry in RediSearch. If missing the name is `'suggestion'`.
 - The `score` parameter is a float used to indicate _priority_ of the value in the suggestion. If missing the score is set to `1.0`.
-- The `type` parameter is a string used to indicate how the value should be read (see below for more information). If missing the type is set to `'full'`.
 - The `increment` parameter is a boolean used to indicate is the score of the current suggestion should be added to an already existing suggestion with the same value. If missing, score are not added.
 - The `payload` parameter is a string used to add additional data to the suggestion (not used in the suggestion engine). If missing no payload is attach to the suggestion.
-
-The available `type` are:
-
- - `full` (`\MacFJA\RediSearch\Integration\Annotation\Suggestion::TYPE_FULL` or `\MacFJA\RediSearch\Integration\Attribute\Suggestion::TYPE_FULL`). The data is used as is.
- - `word` (`\MacFJA\RediSearch\Integration\Annotation\Suggestion::TYPE_WORD` or `\MacFJA\RediSearch\Integration\Attribute\Suggestion::TYPE_WORD`). The data is split (whitespace) and each word is a new suggestion. The full data is also used.
-
-The data link to `Suggestion` can be a scalar data, or a simple array (one dimension) of scalar
 
 ### JSON Mapping
 
@@ -165,9 +158,9 @@ The JSON should respect the [Schema](src/Json/schema.json).
       "manufacturer_address": {"property": "manufacturerAddress", "type": "geo"}
     },
     "suggestions": [
-      {"property": "name", "type": "full"},
-      {"property": "colors", "type": "full", "group": "color"},
-      {"getter": "getManufacturerName", "type": "word"}
+      {"property": "name"},
+      {"property": "colors", "group": "color"},
+      {"getter": "getManufacturerName"}
     ]
   }
 ]
@@ -204,9 +197,9 @@ The JSON should respect the [XSD Schema](src/Xml/schema.xsd).
             <geo-field property="manufacturerAddress">manufacturer_address</geo-field>
         </fields>
         <suggestions>
-            <property name="name" type="full" />
-            <property name="colors" type="full" group="color" />
-            <getter name="getManufacturerName" type="word" />
+            <property name="name" />
+            <property name="colors" group="color" />
+            <getter name="getManufacturerName" />
         </suggestions>
     </class>
 </redis-search>
@@ -221,13 +214,13 @@ The XML file must be given to the `\MacFJA\RediSearch\Integration\Xml\XmlProvide
 
 ### The interface mapping
 
-If a class implement the interface `\MacFJA\RediSearch\Integration\MappedClass` then the methods of this interface will be used by the `\MacFJA\RediSearch\Integration\ClassProvider`.
+You can create your own mapping by implementing the `\MacFJA\RediSearch\Integration\Mapping` interface, and add the class to the `SimpleProvider`.
 
-Interface mapping is enabled by default in the `\MacFJA\RediSearch\Integration\CompositeProvider`.
+(The `SimpleProvider` can be added to a `CompositeProvider`)
 
 ## Events
 
-The `ObjectManager` emit several events to allow you to alter its behavior.
+The `ObjectWorker` emit several events to allow you to alter its behavior.
 
 Event have separate into two main group: **Before** and **After** group.
 With the **Before** group you can change configurations before interacting with Redis.
@@ -235,28 +228,31 @@ The **After** allow you to do more action with results.
 
 ### The `Before` group
 
-_In **bold** paramaters that can be changed._
+_In **bold** parameters that can be changed._
 
-Event name | `ObjectManager` method | Available parameters
+Event name | `ObjectWorker` method (Associated Interface) | Available parameters
 --- | --- | ---
-`AddingDocumentToSearchEvent` | `addObjectInSearch` and `addObject` | **`data`**, **`documentId`**, `instance` _(r/o)_ 
-`AddingSuggestionEvent` | `addObjectInSuggestion` and `addObject` | **`group`**, **`suggestion`**, **`score`**, **`increment`**, **`payload`**, `instance` _(r/o)_ 
-`CreatingIndexEvent` | `createIndex` | **`builder`**, `classname` _(r/o)_ 
-`GettingSuggestionsEvent` | `getSuggestions` | `classname` _(r/o)_, **`prefix`**, **`fuzzy`**, **`withScores`**, **`withPayloads`**, **`max`**, **`inGroup`** 
-`RemovingDocumentEvent` | `removeObjectFromSearch` | `instance` _(r/o)_, **`documentId`** 
+`AddingDocumentToSearchEvent` | `persist` and `persistSearch` (`ObjectManager`) | **`data`**, **`documentId`**, `instance` _(r/o)_ 
+`AddingSuggestionEvent` | `persist` and `persistSuggestions` (`ObjectManager`) | **`suggestionMapping`**, `instance` _(r/o)_ 
+`CreatingIndexEvent` | `createIndex` (`ObjectManager`) | **`builder`**, `classname` _(r/o)_ 
+`GettingSuggestionsEvent` | `getSuggestions` (`ObjectRepository`) | `classname` _(r/o)_, **`prefix`**, **`fuzzy`**, **`withScores`**, **`withPayloads`**, **`max`**, **`inGroup`** 
+`GettingFacetsEvent` | `getFacets` (`ObjectRepository`) | `classname` _(r/o)_, **`query`**, **`fields`** 
+`RemovingDocumentFromSearchEvent` | `remove`  (`ObjectManager`) | `instance` _(r/o)_, **`documentId`** 
 
 ### The `After` group
 
-_In **bold** paramaters that can be changed._
+_In **bold** parameters that can be changed._
 
-Event name | `ObjectManager` method | Available parameters
+Event name | `ObjectWork` method (Associated Interface) | Available parameters
 --- | --- | ---
-`AddingDocumentToSearchEvent` | `addObjectInSearch` and `addObject` |  `data` _(r/o)_, `documentId` _(r/o)_, `instance` _(r/o)_
-`AddingSuggestionEvent` | `addObjectInSuggestion` and `addObject` | `group` _(r/o)_, `suggestion` _(r/o)_, `score` _(r/o)_, `increment` _(r/o)_, `payload` _(r/o)_, `instance` _(r/o)_
-`CreatingIndexEvent` | `createIndex` | `succeed` _(r/o)_, `classname` _(r/o)_
-`GettingSearchBuilderEvent` | `getSearchBuilder` | **`searchBuilder`**, `classname` _(r/o)_ 
-`GettingSuggestionsEvent` | `getSuggestions` | `classname` _(r/o)_, `prefix` _(r/o)_, `fuzzy` _(r/o)_, `withScores` _(r/o)_, `withPayloads` _(r/o)_, `max` _(r/o)_, `inGroup` _(r/o)_, **`suggestions`** 
-`RemovingDocumentEvent` | `removeObjectFromSearch` | `instance` _(r/o)_, `documentId` _(r/o)_, `succeed` _(r/o)_
+`AddingDocumentToSearchEvent` | `persist` and `persistSearch` (`ObjectManager`) |  `data` _(r/o)_, `documentId` _(r/o)_, `instance` _(r/o)_, `update` _(r/o)_
+`AddingSuggestionEvent` | `persist` and `persistSuggestions` (`ObjectManager`) | `group` _(r/o)_, `suggestion` _(r/o)_, `score` _(r/o)_, `increment` _(r/o)_, `payload` _(r/o)_, `instance` _(r/o)_
+`CreatingIndexEvent` | `createIndex` (`ObjectManager`) | `succeed` _(r/o)_, `classname` _(r/o)_
+`GettingAggregateEvent` | `getAggregateCommand` (`ObjectRepository`) | **`aggregate`**, `classname` _(r/o)_ 
+`GettingFacetsEvent` | `getFacets` (`ObjectRepository`) | `classname` _(r/o)_, `query` _(r/o)_, `fields` _(r/o)_, **`facets`**
+`GettingSearchEvent` | `getSearchCommand` (`ObjectRepository`) | **`search`**, `classname` _(r/o)_ 
+`GettingSuggestionsEvent` | `getSuggestions` (`ObjectRepository`) | `classname` _(r/o)_, `prefix` _(r/o)_, `fuzzy` _(r/o)_, `withScores` _(r/o)_, `withPayloads` _(r/o)_, `max` _(r/o)_, `inGroup` _(r/o)_, **`suggestions`** 
+`RemovingDocumentFromSearchEvent` | `remove` (`ObjectManager`) | `instance` _(r/o)_, `documentId` _(r/o)_, `succeed` _(r/o)_
 
 ## Contributing
 

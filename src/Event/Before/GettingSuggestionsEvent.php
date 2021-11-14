@@ -21,7 +21,12 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\Event\Before;
 
-class GettingSuggestionsEvent
+use MacFJA\RediSearch\Integration\Event\Event;
+
+/**
+ * @codeCoverageIgnore Value object
+ */
+class GettingSuggestionsEvent implements Event
 {
     /** @var string */
     private $prefix;
@@ -44,9 +49,6 @@ class GettingSuggestionsEvent
     /** @var null|string */
     private $inGroup;
 
-    /**
-     * GettingSuggestionEvent constructor.
-     */
     public function __construct(string $classname, string $prefix, bool $fuzzy, bool $withScores, bool $withPayloads, ?int $max, ?string $inGroup)
     {
         $this->prefix = $prefix;

@@ -21,7 +21,12 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\Event\After;
 
-class CreatingIndexEvent
+use MacFJA\RediSearch\Integration\Event\Event;
+
+/**
+ * @codeCoverageIgnore Value object
+ */
+class CreatingIndexEvent implements Event
 {
     /** @var string */
     private $classname;

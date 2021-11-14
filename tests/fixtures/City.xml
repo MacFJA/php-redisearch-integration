@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<redis-search xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../src/Xml/schema.xsd">
+    <class name="MacFJA\RediSearch\Integration\tests\fixtures\City" indexname="cities" documentprefix="city-">
+        <fields>
+            <text-field nostem="false" weight="2.0" sortable="true" noindex="false">name</text-field>
+            <text-field nostem="false" weight="0.8" sortable="true" noindex="false">country</text-field>
+            <numeric-field sortable="true" noindex="false">population</numeric-field>
+            <tag-field getter="getAllLanguages" separator="|" sortable="false" noindex="false">languages</tag-field>
+            <geo-field getter="getGpsCoordinate" noindex="false">coordinate</geo-field>
+        </fields>
+        <suggestions>
+            <property name="name" score="1.5" group="place" />
+            <getter name="getCountry" group="place" payload="country" />
+        </suggestions>
+    </class>
+</redis-search>

@@ -21,62 +21,25 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\Event\Before;
 
-class AddingSuggestionEvent
+use MacFJA\RediSearch\Integration\Event\Event;
+use MacFJA\RediSearch\Integration\Mapping\SuggestionMapping;
+
+/**
+ * @codeCoverageIgnore Value object
+ */
+class AddingSuggestionEvent implements Event
 {
-    /** @var string */
-    private $group;
-
-    /** @var string */
-    private $suggestion;
-
-    /** @var float */
-    private $score;
-
-    /** @var bool */
-    private $increment;
-
-    /** @var null|string */
-    private $payload;
-
     /** @var object */
     private $instance;
-
     /**
-     * BeforeAddingSuggestionEvent constructor.
+     * @var SuggestionMapping
      */
-    public function __construct(string $group, string $suggestion, float $score, bool $increment, ?string $payload, object $instance)
+    private $suggestionMapping;
+
+    public function __construct(SuggestionMapping $suggestionMapping, object $instance)
     {
-        $this->group = $group;
-        $this->suggestion = $suggestion;
-        $this->score = $score;
-        $this->increment = $increment;
-        $this->payload = $payload;
         $this->instance = $instance;
-    }
-
-    public function getGroup(): string
-    {
-        return $this->group;
-    }
-
-    public function getSuggestion(): string
-    {
-        return $this->suggestion;
-    }
-
-    public function getScore(): float
-    {
-        return $this->score;
-    }
-
-    public function isIncrement(): bool
-    {
-        return $this->increment;
-    }
-
-    public function getPayload(): ?string
-    {
-        return $this->payload;
+        $this->suggestionMapping = $suggestionMapping;
     }
 
     public function getInstance(): object
@@ -84,38 +47,13 @@ class AddingSuggestionEvent
         return $this->instance;
     }
 
-    public function setGroup(string $group): AddingSuggestionEvent
+    public function getSuggestionMapping(): SuggestionMapping
     {
-        $this->group = $group;
-
-        return $this;
+        return $this->suggestionMapping;
     }
 
-    public function setSuggestion(string $suggestion): AddingSuggestionEvent
+    public function setSuggestionMapping(SuggestionMapping $suggestionMapping): void
     {
-        $this->suggestion = $suggestion;
-
-        return $this;
-    }
-
-    public function setScore(float $score): AddingSuggestionEvent
-    {
-        $this->score = $score;
-
-        return $this;
-    }
-
-    public function setIncrement(bool $increment): AddingSuggestionEvent
-    {
-        $this->increment = $increment;
-
-        return $this;
-    }
-
-    public function setPayload(?string $payload): AddingSuggestionEvent
-    {
-        $this->payload = $payload;
-
-        return $this;
+        $this->suggestionMapping = $suggestionMapping;
     }
 }

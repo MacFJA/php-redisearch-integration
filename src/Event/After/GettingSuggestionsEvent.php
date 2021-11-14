@@ -21,9 +21,13 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\Event\After;
 
-use MacFJA\RediSearch\Suggestion\Result;
+use MacFJA\RediSearch\Integration\Event\Event;
+use MacFJA\RediSearch\Redis\Response\SuggestionResponseItem;
 
-class GettingSuggestionsEvent
+/**
+ * @codeCoverageIgnore Value object
+ */
+class GettingSuggestionsEvent implements Event
 {
     /** @var string */
     private $prefix;
@@ -46,11 +50,11 @@ class GettingSuggestionsEvent
     /** @var null|string */
     private $inGroup;
 
-    /** @var array<string,array<Result>> */
+    /** @var array<string,array<SuggestionResponseItem>> */
     private $suggestions;
 
     /**
-     * @param array<string,array<Result>> $suggestions
+     * @param array<string,array<SuggestionResponseItem>> $suggestions
      */
     public function __construct(string $prefix, bool $fuzzy, bool $withScores, bool $withPayloads, ?int $max, string $classname, ?string $inGroup, array $suggestions)
     {
@@ -100,7 +104,7 @@ class GettingSuggestionsEvent
     }
 
     /**
-     * @return array<string,array<Result>>
+     * @return array<string,array<SuggestionResponseItem>>
      */
     public function getSuggestions(): array
     {
@@ -108,7 +112,7 @@ class GettingSuggestionsEvent
     }
 
     /**
-     * @param array<string,array<Result>> $suggestions
+     * @param array<string,array<SuggestionResponseItem>> $suggestions
      *
      * @return $this
      */

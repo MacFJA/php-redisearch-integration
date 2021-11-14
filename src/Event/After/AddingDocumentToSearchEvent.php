@@ -21,27 +21,35 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\Event\After;
 
-class AddingDocumentToSearchEvent
+use MacFJA\RediSearch\Integration\Event\Event;
+
+/**
+ * @codeCoverageIgnore Value object
+ */
+class AddingDocumentToSearchEvent implements Event
 {
     /** @var object */
     private $instance;
 
-    /** @var array<string,float|int|string> */
+    /** @var array<string,bool|float|int|string> */
     private $data;
 
     /** @var string */
     private $documentId;
+    /**
+     * @var bool
+     */
+    private $update;
 
     /**
-     * BeforeAddingDocumentToSearchEvent constructor.
-     *
-     * @param array<string,float|int|string> $data
+     * @param array<string,bool|float|int|string> $data
      */
-    public function __construct(object $instance, array $data, string $documentId)
+    public function __construct(object $instance, array $data, string $documentId, bool $update)
     {
         $this->instance = $instance;
         $this->data = $data;
         $this->documentId = $documentId;
+        $this->update = $update;
     }
 
     public function getInstance(): object
@@ -50,7 +58,7 @@ class AddingDocumentToSearchEvent
     }
 
     /**
-     * @return array<string,float|int|string>
+     * @return array<string,bool|float|int|string>
      */
     public function getData(): array
     {
@@ -60,5 +68,10 @@ class AddingDocumentToSearchEvent
     public function getDocumentId(): string
     {
         return $this->documentId;
+    }
+
+    public function isUpdate(): bool
+    {
+        return $this->update;
     }
 }
