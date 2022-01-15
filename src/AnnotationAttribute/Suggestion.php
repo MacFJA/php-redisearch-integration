@@ -29,7 +29,7 @@ use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
  * @Target({"PROPERTY", "METHOD"})
  * @NamedArgumentConstructor
  */
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_PROPERTY|Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
 class Suggestion
 {
     /** @var string */

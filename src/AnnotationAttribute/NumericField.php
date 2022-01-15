@@ -31,7 +31,7 @@ use MacFJA\RediSearch\Redis\Command\CreateCommand\NumericFieldOption;
  * @Target({"PROPERTY", "METHOD"})
  * @NamedArgumentConstructor
  */
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_PROPERTY|Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
 class NumericField implements FieldAnnotationAttribute
 {
     /** @var bool */

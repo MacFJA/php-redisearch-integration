@@ -21,6 +21,8 @@ declare(strict_types=1);
 
 namespace MacFJA\RediSearch\Integration\Json;
 
+use function is_array;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\TagField;
 use MacFJA\RediSearch\Integration\Mapping;
 use MacFJA\RediSearch\Integration\Mapping\FieldMapping;
 use MacFJA\RediSearch\Integration\Mapping\SuggestionMapping;
@@ -93,12 +95,17 @@ class JsonMapping implements Mapping
         $keys = array_map('strval', array_keys($fields));
 
         return array_combine($keys, array_map(function ($field, $fieldName) use ($object) {
-            return $this->getFieldValue(
+            $value = $this->getFieldValue(
                 $object,
                 $field['getter'] ?? null,
                 $field['property'] ?? null,
                 $fieldName
             );
+            if (is_array($value) && 'tag' === $field['type']) {
+                $value = implode($field['separator'] ?? TagField::DEFAULT_SEPARATOR, $value);
+            }
+
+            return $value;
         }, $fields, $keys)) ?: [];
     }
 

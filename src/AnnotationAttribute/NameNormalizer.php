@@ -35,17 +35,16 @@ trait NameNormalizer
     {
         if ($reflection instanceof ReflectionMethod) {
             $methodName = $reflection->getName();
-            $fieldName = preg_replace('/^(is|set|get)([A-Z])/', '$2', $methodName);
+            $fieldName = preg_replace('/^(is|get)([A-Z])/', '$2', $methodName);
 
-            if (!is_string($fieldName)) {
+            if (!is_string($fieldName) || $fieldName === $reflection->getName()) {
                 throw new RuntimeException('The name is invalid');
             }
 
             if (1 === strlen($fieldName)) {
                 return strtolower($fieldName);
             }
-            $firstTwo = substr($fieldName, 0, 2);
-            if ($firstTwo === strtoupper($firstTwo)) {
+            if (1 === preg_match('/^[A-Z]{2}/', $fieldName)) {
                 return $fieldName;
             }
 
@@ -57,22 +56,5 @@ trait NameNormalizer
         }
 
         throw new InvalidArgumentException('$reflector must be either a \ReflectionMethod or a \ReflectionProperty');
-    }
-
-    /**
-     * @param array{"meta":object,"method"?:ReflectionMethod,"property"?:ReflectionProperty} $annotationData
-     */
-    private function getFieldName(array $annotationData): string
-    {
-        /** @var null|ReflectionMethod|ReflectionProperty $reflection */
-        $reflection = $annotationData['method'] ?? $annotationData['property'] ?? null;
-        /** @var null|FieldAnnotationAttribute $annotation */
-        $annotation = $annotationData['meta'];
-
-        if (!$annotation instanceof FieldAnnotationAttribute) {
-            throw new InvalidArgumentException('The provided Annotation/Attribute is not a Field');
-        }
-
-        return $annotation->getName() ?? $this->getNormalizedName($reflection);
     }
 }

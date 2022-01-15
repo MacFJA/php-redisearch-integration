@@ -19,64 +19,51 @@ declare(strict_types=1);
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace MacFJA\RediSearch\Integration\Worker;
+namespace MacFJA\RediSearch\Integration\tests\fixtures\mapping;
 
-use MacFJA\RediSearch\Redis\Command;
+use MacFJA\RediSearch\Integration\AnnotationAttribute as RS;
 
-/**
- * @codeCoverageIgnore
- */
-class AddDocument implements Command
+#[RS\Index(name: 'simple')]
+/** @RS\Index(name="simple") */
+class SimpleObject
 {
     /**
+     * @RS\TextField(noStem=true,sortable=true,noIndex=false,unNormalized=true,weight="1.4",phonetic="dm:french")
+     *
      * @var string
      */
-    private $documentId;
+    #[RS\TextField(noStem: true, sortable: true, noIndex: false, unNormalized: true, weight: 1.4, phonetic: 'dm:french')]
+    private $f1;
     /**
-     * @var array<string,mixed>
+     * @RS\NumericField(noIndex=true,sortable=true)
+     *
+     * @var int
      */
-    private $data;
-
+    #[RS\NumericField(noIndex: true, sortable: true)]
+    private $f2;
     /**
-     * @param array<string,mixed> $data
+     * @RS\TagField(caseSensitive=true,separator="*",sortable=true)
+     *
+     * @var array
      */
-    public function __construct(string $documentId, array $data)
+    #[RS\TagField(caseSensitive: true, sortable: true, separator: '*')]
+    private $f3;
+
+    /** @var string */
+    private $f4;
+
+    public function __construct(string $f1, int $f2, array $f3, string $f4)
     {
-        $this->documentId = $documentId;
-        $this->data = $data;
+        $this->f1 = $f1;
+        $this->f2 = $f2;
+        $this->f3 = $f3;
+        $this->f4 = $f4;
     }
 
-    public function getId(): string
+    /** @RS\GeoField(sortable=true) */
+    #[RS\GeoField(sortable: true)]
+    public function getF4(): string
     {
-        return 'HSET';
-    }
-
-    public function getRediSearchVersion(): string
-    {
-        return '2.0.0';
-    }
-
-    /**
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    public function setRediSearchVersion(string $rediSearchVersion): Command
-    {
-        return $this;
-    }
-
-    public function getArguments(): array
-    {
-        $arguments = [$this->documentId];
-        foreach ($this->data as $field => $value) {
-            $arguments[] = $field;
-            $arguments[] = $value;
-        }
-
-        return $arguments;
-    }
-
-    public function parseResponse($data)
-    {
-        return $data;
+        return $this->f4;
     }
 }

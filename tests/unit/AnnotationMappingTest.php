@@ -123,10 +123,7 @@ class AnnotationMappingTest extends \PHPUnit\Framework\TestCase
             'age' => 30,
             'gps' => '0,0',
             'lastname' => 'Doe',
-            'skill' => [
-                0 => 'reading',
-                1 => 'speaking',
-            ],
+            'skill' => 'reading|speaking',
         ], $annotation->getData($object));
     }
 

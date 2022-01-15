@@ -25,6 +25,8 @@
                 <xs:attribute type="xs:boolean" name="noindex" use="optional"/>
                 <xs:attribute type="xs:string" name="property" use="optional"/>
                 <xs:attribute type="xs:string" name="getter" use="optional"/>
+                <xs:attribute type="xs:boolean" name="sortable" use="optional"/>
+                <xs:attribute type="xs:boolean" name="unnormalized" use="optional"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
@@ -34,22 +36,19 @@
                 <xs:attribute type="xs:string" name="nostem" use="optional"/>
                 <xs:attribute type="xs:float" name="weight" use="optional"/>
                 <xs:attribute type="xs:string" name="phonetic" use="optional"/>
-                <xs:attribute type="xs:boolean" name="sortable" use="optional"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>
     <xs:complexType name="numericFieldType">
         <xs:simpleContent>
-            <xs:extension base="abstractFieldType">
-                <xs:attribute type="xs:boolean" name="sortable" use="optional"/>
-            </xs:extension>
+            <xs:extension base="abstractFieldType"/>
         </xs:simpleContent>
     </xs:complexType>
     <xs:complexType name="tagFieldType">
         <xs:simpleContent>
             <xs:extension base="abstractFieldType">
                 <xs:attribute type="xs:string" name="separator" use="optional" />
-                <xs:attribute type="xs:boolean" name="sortable" use="optional"/>
+                <xs:attribute type="xs:boolean" name="casesensitive" use="optional"/>
             </xs:extension>
         </xs:simpleContent>
     </xs:complexType>

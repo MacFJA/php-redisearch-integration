@@ -22,6 +22,8 @@ declare(strict_types=1);
 namespace MacFJA\RediSearch\Integration\AnnotationAttribute;
 
 use function count;
+use function is_array;
+use MacFJA\RediSearch\Integration\Mapping;
 use MacFJA\RediSearch\Integration\Mapping\SuggestionMapping;
 use MacFJA\RediSearch\Redis\Command\CreateCommand\CreateCommandFieldOption;
 use ReflectionClass;
@@ -29,7 +31,7 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionProperty;
 
-abstract class AbstractMapping implements \MacFJA\RediSearch\Integration\Mapping
+abstract class AbstractMapping implements Mapping
 {
     use NameNormalizer;
     use ReflectionFieldValue;
@@ -138,8 +140,15 @@ abstract class AbstractMapping implements \MacFJA\RediSearch\Integration\Mapping
             $method = $metaData['method'] ?? null;
             /** @var null|ReflectionProperty $property */
             $property = $metaData['property'] ?? null;
+            /** @var FieldAnnotationAttribute $field */
+            $field = $metaData['meta'];
 
-            $fields[$this->getFieldName($metaData)] = $this->getReflectionValue($object, $method ?? $property);
+            $value = $this->getReflectionValue($object, $method ?? $property);
+            if ($field instanceof TagField && is_array($value)) {
+                $value = implode($field->getSeparator() ?? TagField::DEFAULT_SEPARATOR, $value);
+            }
+
+            $fields[$this->getFieldName($metaData)] = $value;
         }
 
         return $fields;
@@ -211,4 +220,17 @@ abstract class AbstractMapping implements \MacFJA\RediSearch\Integration\Mapping
      * @return array<T>
      */
     abstract protected function getClassMeta(ReflectionClass $class, string $type): array;
+
+    /**
+     * @param array{"meta":object,"method"?:ReflectionMethod,"property"?:ReflectionProperty} $annotationData
+     */
+    private function getFieldName(array $annotationData): string
+    {
+        /** @var null|ReflectionMethod|ReflectionProperty $reflection */
+        $reflection = $annotationData['method'] ?? $annotationData['property'] ?? null;
+        /** @var FieldAnnotationAttribute $annotation */
+        $annotation = $annotationData['meta'];
+
+        return $annotation->getName() ?? $this->getNormalizedName($reflection);
+    }
 }

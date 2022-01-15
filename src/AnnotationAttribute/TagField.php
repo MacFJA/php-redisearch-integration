@@ -31,9 +31,10 @@ use MacFJA\RediSearch\Redis\Command\CreateCommand\TagFieldOption;
  * @Target({"PROPERTY", "METHOD"})
  * @NamedArgumentConstructor
  */
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_PROPERTY|Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY | Attribute::IS_REPEATABLE)]
 class TagField implements FieldAnnotationAttribute
 {
+    public const DEFAULT_SEPARATOR = ', ';
     /** @var null|string */
     private $separator;
 
@@ -79,5 +80,10 @@ class TagField implements FieldAnnotationAttribute
             ->setSeparator($this->separator)
             ->setCaseSensitive($this->caseSensitive)
         ;
+    }
+
+    public function getSeparator(): ?string
+    {
+        return $this->separator;
     }
 }

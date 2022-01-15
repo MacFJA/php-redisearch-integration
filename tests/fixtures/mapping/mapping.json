@@ -1,0 +1,36 @@
+[
+  {
+    "class": "MacFJA\\RediSearch\\Integration\\tests\\fixtures\\mapping\\SimpleObject",
+    "index": "simple",
+    "fields": {
+      "f1": {
+        "property": "f1",
+        "type": "text",
+        "sortable": true,
+        "noindex": false,
+        "weight": 1.4,
+        "phonetic": "dm:french",
+        "nostem": true,
+        "unnormalized": true
+      },
+      "f2": {
+        "property": "f2",
+        "type": "numeric",
+        "noindex": true,
+        "sortable": true
+      },
+      "f3": {
+        "property": "f3",
+        "type": "tag",
+        "separator": "*",
+        "casesensitive": true,
+        "sortable": true
+      },
+      "f4": {
+        "property": "f4",
+        "type": "geo",
+        "sortable": true
+      }
+    }
+  }
+]

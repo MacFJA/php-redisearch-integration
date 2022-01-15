@@ -27,7 +27,9 @@ use DOMNode;
 use DOMNodeList;
 use DOMXPath;
 use EmptyIterator;
+use function is_array;
 use IteratorIterator;
+use MacFJA\RediSearch\Integration\AnnotationAttribute\TagField;
 use MacFJA\RediSearch\Integration\Mapping;
 use MacFJA\RediSearch\Integration\Mapping\FieldMapping;
 use MacFJA\RediSearch\Integration\Mapping\SuggestionMapping;
@@ -107,7 +109,12 @@ class XmlMapping implements Mapping
         foreach ($xpath as $xpathField) {
             $method = $this->attributeStringOrNull($xpathField, 'getter');
             $property = $this->attributeStringOrNull($xpathField, 'property');
-            $fields[$xpathField->textContent] = $this->getFieldValue($object, $method, $property, $xpathField->textContent);
+            $fieldName = $xpathField->textContent;
+            $value = $this->getFieldValue($object, $method, $property, $fieldName);
+            if (is_array($value) && 'tag-field' === $xpathField->localName) {
+                $value = implode($this->attributeStringOrNull($xpathField, 'separator') ?? TagField::DEFAULT_SEPARATOR, $value);
+            }
+            $fields[$fieldName] = $value;
         }
 
         return $fields;

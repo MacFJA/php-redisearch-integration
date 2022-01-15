@@ -24,7 +24,8 @@
           "property": { "type": "string" },
           "getter": { "type": "string" },
           "sortable": { "type": "boolean", "default": false },
-          "noindex": { "type": "boolean", "default": false }
+          "noindex": { "type": "boolean", "default": false },
+          "unnormalized": { "type": "boolean", "default": false }
         },
         "additionalProperties": false
       },
@@ -44,6 +45,7 @@
         "properties": {
           "type": { "type": "string", "pattern": "tag" },
           "separator": { "type": "string", "maxLength": 1, "minLength": 1 },
+          "casesensitive": { "type": "boolean", "default": false },
           "property": { "type": "string" },
           "getter": { "type": "string" },
           "sortable": { "type": "boolean", "default": false },

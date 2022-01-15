@@ -4,8 +4,12 @@ parameters:
     paths:
         - src
         - tests
+    excludePaths:
+        - tests/fixtures/mapping/SimpleObject.php
+        - tests/unit/NameNormalizerTest.php
     ignoreErrors:
         - '#Call to an undefined method Reflection([\w<>]+)::getAttributes\(\)\.#'
+        - '#.+ (type|class) ReflectionAttribute\.#'
 services:
     -
         class: \MacFJA\RediSearch\Integration\tests\phpstan\PsrEventDispatcher

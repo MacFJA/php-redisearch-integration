@@ -22,6 +22,7 @@ declare(strict_types=1);
 namespace MacFJA\RediSearch\Integration\tests\unit;
 
 use MacFJA\RediSearch\Integration\Annotation\AnnotationProvider;
+use MacFJA\RediSearch\Integration\Attribute\AttributeProvider;
 use MacFJA\RediSearch\Integration\CompositeProvider;
 use MacFJA\RediSearch\Integration\Json\JsonProvider;
 use MacFJA\RediSearch\Integration\Mapping;
@@ -48,6 +49,8 @@ use MacFJA\RediSearch\Redis\Command\CreateCommand\TextFieldOption;
  * @covers \MacFJA\RediSearch\Integration\AnnotationAttribute\Suggestion
  * @covers \MacFJA\RediSearch\Integration\AnnotationAttribute\TagField
  * @covers \MacFJA\RediSearch\Integration\AnnotationAttribute\TextField
+ * @covers \MacFJA\RediSearch\Integration\Attribute\AttributeMapping
+ * @covers \MacFJA\RediSearch\Integration\Attribute\AttributeProvider
  * @covers \MacFJA\RediSearch\Integration\CompositeProvider
  * @covers \MacFJA\RediSearch\Integration\Json\JsonMapping
  * @covers \MacFJA\RediSearch\Integration\Json\JsonProvider
@@ -160,6 +163,48 @@ class MappingProviderTest extends \PHPUnit\Framework\TestCase
     public function testAnnotationProvider(): void
     {
         $provider = new AnnotationProvider();
+
+        static::assertFalse($provider->hasMappingFor(City::class));
+        static::assertTrue($provider->hasMappingFor(Car::class));
+
+        $car = new Car();
+        $car
+            ->setModel('Corolla')
+            ->setMaker('Toyota')
+            ->setYear(2019)
+            ->setType('Compact')
+        ;
+
+        $mapping = $provider->getMapping($car);
+        $mappingClass = $provider->getMapping(Car::class);
+
+        static::assertSame($mapping, $mappingClass);
+
+        static::assertNotNull($mapping);
+
+        static::assertSame('car', $mapping->getIndexName());
+        static::assertSame('car-', $mapping->getDocumentPrefix());
+        static::assertSame('car-toyota-corolla-2019', $mapping->getDocumentId($car));
+        static::assertEquals([
+            'model' => 'Corolla',
+            'maker' => 'Toyota',
+            'year' => 2019,
+            'type' => 'Compact',
+        ], $mapping->getData($car));
+        static::assertEqualsCanonicalizing(['brand', 'suggestion'], $mapping->getSuggestionGroups());
+        static::assertEquals([
+            (new SuggestionMapping())->setData('Corolla')->setDictionary('brand'),
+            (new SuggestionMapping())->setData('Toyota')->setDictionary('brand')->setScore(0.7),
+            (new SuggestionMapping())->setData('Compact')->setDictionary('suggestion')->setScore(0.3)->setIncrement(true),
+        ], $mapping->getSuggestion($car));
+    }
+
+    public function testAttributeProvider(): void
+    {
+        if (version_compare(PHP_VERSION, '8.0.0') < 0) {
+            static::markTestSkipped('Need PHP 8 for Attribute');
+        }
+        $provider = new AttributeProvider();
 
         static::assertFalse($provider->hasMappingFor(City::class));
         static::assertTrue($provider->hasMappingFor(Car::class));

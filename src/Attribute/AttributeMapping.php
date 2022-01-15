@@ -22,6 +22,7 @@ declare(strict_types=1);
 namespace MacFJA\RediSearch\Integration\Attribute;
 
 use MacFJA\RediSearch\Integration\AnnotationAttribute\AbstractMapping;
+use ReflectionAttribute;
 use ReflectionClass;
 
 class AttributeMapping extends AbstractMapping
@@ -33,7 +34,7 @@ class AttributeMapping extends AbstractMapping
             /** @noinspection SlowArrayOperationsInLoopInspection */
             $attributes = array_merge($attributes, array_map(static function ($attribute) use ($reflectionMethod) {
                 return ['method' => $reflectionMethod, 'meta' => $attribute->newInstance()];
-            }, $reflectionMethod->getAttributes($type)));
+            }, $reflectionMethod->getAttributes($type, ReflectionAttribute::IS_INSTANCEOF)));
         }
 
         return $attributes;
@@ -46,7 +47,7 @@ class AttributeMapping extends AbstractMapping
             /** @noinspection SlowArrayOperationsInLoopInspection */
             $attributes = array_merge($attributes, array_map(static function ($attribute) use ($reflectionProperty) {
                 return ['property' => $reflectionProperty, 'meta' => $attribute->newInstance()];
-            }, $reflectionProperty->getAttributes($type)));
+            }, $reflectionProperty->getAttributes($type, ReflectionAttribute::IS_INSTANCEOF)));
         }
 
         return $attributes;
@@ -54,6 +55,6 @@ class AttributeMapping extends AbstractMapping
 
     protected function getClassMeta(ReflectionClass $class, string $type): array
     {
-        return $class->getAttributes($type);
+        return array_map(static function (ReflectionAttribute $attribute) { return $attribute->newInstance(); }, $class->getAttributes($type));
     }
 }

@@ -27,7 +27,7 @@ use Attribute;
  * @Annotation
  * @Target({"PROPERTY", "METHOD"})
  */
-#[Attribute(Attribute::TARGET_METHOD|Attribute::TARGET_PROPERTY)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_PROPERTY)]
 class DocumentId
 {
 }

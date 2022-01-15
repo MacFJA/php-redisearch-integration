@@ -30,6 +30,7 @@ use MacFJA\RediSearch\Integration\AnnotationAttribute\Suggestion;
 use MacFJA\RediSearch\Integration\AnnotationAttribute\TagField;
 use MacFJA\RediSearch\Integration\AnnotationAttribute\TextField;
 
+#[Index(name: 'car', prefix: 'car-')]
 /**
  * @Index(name="car", prefix="car-")
  */
@@ -41,12 +42,15 @@ class Car
      *
      * @var null|string
      */
+    #[TextField(sortable: true)]
+    #[Suggestion(group: 'brand')]
     private $model;
     /**
      * @NumericField()
      *
      * @var null|int
      */
+    #[NumericField()]
     private $year;
     /**
      * @TextField(weight="0.7",sortable=true)
@@ -54,6 +58,8 @@ class Car
      *
      * @var null|string
      */
+    #[TextField(weight: 0.7, sortable: true)]
+    #[Suggestion(group: 'brand', score: 0.7)]
     private $maker;
     /**
      * @TagField(sortable=true,unNormalized=true)
@@ -61,6 +67,8 @@ class Car
      *
      * @var null|string
      */
+    #[TagField(sortable: true, unNormalized: true)]
+    #[Suggestion(score: 0.3, increment: true)]
     private $type;
 
     public function getModel(): ?string
@@ -114,6 +122,7 @@ class Car
     /**
      * @DocumentId()
      */
+    #[DocumentId]
     public function getIdentifier(): ?string
     {
         if (is_string($this->model) && is_string($this->maker) && is_int($this->year)) {

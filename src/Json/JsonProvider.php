@@ -55,7 +55,7 @@ class JsonProvider implements MappingProvider
         }
 
         foreach ($json as $mapping) {
-            if (!array_key_exists('class', $mapping)) {
+            if (!array_key_exists('class', $mapping) || !is_string($mapping['class'])) {
                 continue;
             }
             $this->mappings[$mapping['class']] = new JsonMapping($mapping);

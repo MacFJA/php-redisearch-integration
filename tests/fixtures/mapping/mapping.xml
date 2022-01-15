@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<redis-search xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../src/Xml/schema.xsd">
+    <class name="MacFJA\RediSearch\Integration\tests\fixtures\mapping\SimpleObject" indexname="simple">
+        <fields>
+            <text-field nostem="true" weight="1.4" sortable="true" noindex="false" phonetic="dm:french" unnormalized="true">f1</text-field>
+            <numeric-field sortable="true" noindex="true">f2</numeric-field>
+            <tag-field property="f3" separator="*" sortable="true" casesensitive="true">f3</tag-field>
+            <geo-field sortable="true">f4</geo-field>
+        </fields>
+    </class>
+</redis-search>
